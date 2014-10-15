@@ -88,7 +88,7 @@ function mongoDump(options, directory, callback) {
   callback = callback || function() { };
 
   mongoOptions= [
-    '-h', options.host + ':' + options.port,
+    '-h', options.host,
     '-d', options.db,
     '-o', directory
   ];
