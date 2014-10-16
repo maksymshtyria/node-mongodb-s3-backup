@@ -1,17 +1,17 @@
 {
   "mongodb": {
-    "host": "localhost",
-    "port": 27017,
-    "username": false,
-    "password": false,
-    "db": "database_to_backup"
-  },
-  "s3": {
-    "key": "your_s3_key",
-    "secret": "your_s3_secret",
-    "bucket": "s3_bucket_to_upload_to",
-    "destination": "/"
-  },
+            "host":       "mymedic/mongodb.mymedic.me:27017,mongodb2.mymedic.me:27017",
+            "port":       27017,
+            "username":     false,
+            "password":     false,
+            "db":       "zoobbook"
+          },
+          "s3": {
+            "key":      "AKIAI4OWPID5BOOACW6Q",
+            "secret":     "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",
+            "bucket":     "mymedic",
+            "destination":  "/backup"
+        },
   "cron": {
     "time": "00:00"
   }

@@ -191,14 +191,9 @@ function sendToS3(options, directory, target, callback) {
 
   async.whilst(
     function () {
-      return attempt < 3;
+      return attempt < 5;
     },
     function (next) {
-      attempt++;
-      log(' There is some error so I`ll try to send backup again. ');
-      next();
-    },
-    function () {
       s3client.putFile(sourceFile, path.join(destination, target),  function(err, res){
         res.setEncoding('utf8');
 
@@ -212,16 +207,17 @@ function sendToS3(options, directory, target, callback) {
 
         res.on('end', function(chunk) {
           if (res.statusCode !== 200) {
-            log('Expected a 200 response from S3, got ' + res.statusCode);
+            log(' There is some error so I`ll try to send backup again ' + attempt + ' time'  );
+            attempt++;
           } else {
             log('Successfully uploaded to s3');
             attempt = Infinity;
             
-            return callback();
+            return next();
           }
         });
       });
-    }
+    }, callback
   );
 }
 
