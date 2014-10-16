@@ -2,7 +2,8 @@
 
 var exec = require('child_process').exec
   , spawn = require('child_process').spawn
-  , path = require('path');
+  , path = require('path')
+  , async = require('async');
 
 /**
  * log
@@ -175,7 +176,8 @@ function sendToS3(options, directory, target, callback) {
   var knox = require('knox')
     , sourceFile = path.join(directory, target)
     , s3client
-    , destination = options.destination || '/';
+    , destination = options.destination || '/'
+    , attempt = 0;
 
   callback = callback || function() { };
 
@@ -186,29 +188,41 @@ function sendToS3(options, directory, target, callback) {
   });
 
   log('Attemping to upload ' + target + ' to the ' + options.bucket + ' s3 bucket');
-  s3client.putFile(sourceFile, path.join(destination, target),  function(err, res){
-    if(err) {
-      return callback(err);
+
+  async.whilst(
+    function () {
+      return attempt < 3;
+    },
+    function (next) {
+      attempt++;
+      log(' There is some error so I`ll try to send backup again. ');
+      next();
+    },
+    function () {
+      s3client.putFile(sourceFile, path.join(destination, target),  function(err, res){
+        res.setEncoding('utf8');
+
+        res.on('data', function(chunk){
+          if(res.statusCode !== 200) {
+            log(chunk, 'error');
+          } else {
+            log(chunk);
+          }
+        });
+
+        res.on('end', function(chunk) {
+          if (res.statusCode !== 200) {
+            log('Expected a 200 response from S3, got ' + res.statusCode);
+          } else {
+            log('Successfully uploaded to s3');
+            attempt = Infinity;
+            
+            return callback();
+          }
+        });
+      });
     }
-
-    res.setEncoding('utf8');
-
-    res.on('data', function(chunk){
-      if(res.statusCode !== 200) {
-        log(chunk, 'error');
-      } else {
-        log(chunk);
-      }
-    });
-
-    res.on('end', function(chunk) {
-      if (res.statusCode !== 200) {
-        return callback(new Error('Expected a 200 response from S3, got ' + res.statusCode));
-      }
-      log('Successfully uploaded to s3');
-      return callback();
-    });
-  });
+  );
 }
 
 /**
