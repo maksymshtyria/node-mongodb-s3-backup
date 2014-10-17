@@ -94,6 +94,11 @@ function mongoDump(options, directory, callback) {
     '-o', directory
   ];
 
+  if (options.authSource) {
+    mongoOptions.push('--authenticationDatabase');
+    mongoOptions.push(options.authSource);
+  }
+
   if(options.username && options.password) {
     mongoOptions.push('-u');
     mongoOptions.push(options.username);
@@ -101,6 +106,8 @@ function mongoDump(options, directory, callback) {
     mongoOptions.push('-p');
     mongoOptions.push(options.password);
   }
+
+  console.log('ggggggggggggggggggggggggggggggggggggggggggggggggggggg');
 
   log('Starting mongodump of ' + options.db, 'info');
   mongodump = spawn('mongodump', mongoOptions);
