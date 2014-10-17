@@ -107,8 +107,6 @@ function mongoDump(options, directory, callback) {
     mongoOptions.push(options.password);
   }
 
-  console.log('ggggggggggggggggggggggggggggggggggggggggggggggggggggg');
-
   log('Starting mongodump of ' + options.db, 'info');
   mongodump = spawn('mongodump', mongoOptions);
 
